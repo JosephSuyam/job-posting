@@ -5,7 +5,7 @@ export type JobList = {
   count: number
 }
 
-export type JobData = {
+export type JobData<D> = {
   message: string;
-  data: JobAttributes;
+  data: D;
 }

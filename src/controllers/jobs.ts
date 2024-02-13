@@ -3,19 +3,20 @@ import { Op } from 'sequelize';
 import Jobs, { JobAttributes } from '../models/jobs.model';
 import { JobStatus } from '../models/enums/jobs.enum';
 import { sendJobRequestEmail } from '../helpers/nodemailer.helper';
-import { getPaging, paginate, pagination } from '../helpers/common.helper';
+import { getPaging, paginate, pagination, validateUUID } from '../helpers/common.helper';
 import {
+  GetJobsSchema,
+  FetchJobSchema,
   AddJobSchema,
-  GetJobSchema,
   UpdateJobStatusSchema,
 } from '../middlewares/resourceSchema/jobSchema';
 import { JobData, JobList } from '../helpers/types/jobs.types';
 import { DataSource, ErrorResponse, PaginatedDataResponse } from '../helpers/types/common.types';
-import { MrgeJobPosting, fetchMrge } from '../client/mrge';
+import { MrgeJobPosting, fetchMrgeData } from '../client/mrge';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../helpers/common/response';
 
 export const getJobs = async (
-  req: Request<{}, {}, {}, GetJobSchema>,
+  req: Request<{}, {}, {}, GetJobsSchema>,
   res: Response<PaginatedDataResponse<JobAttributes | MrgeJobPosting> | ErrorResponse>
 ) => {
   try {
@@ -27,10 +28,10 @@ export const getJobs = async (
 
     const [jobs, externalJobPostings]: [JobList, MrgeJobPosting[]] = await Promise.all([
       Jobs.findAndCountAll({
-        ...paging,
+        // ...paging,
         where: where_statement,
       }),
-      fetchMrge(),
+      fetchMrgeData(),
     ]);
     const message = SUCCESS_MESSAGES.RETRIEVE_JOB_LIST;
 
@@ -60,9 +61,48 @@ export const getJobs = async (
   }
 }
 
+export const fetchJob = async (
+  req: Request<FetchJobSchema>,
+  res: Response<JobData<JobAttributes | null | MrgeJobPosting> | ErrorResponse>
+) => {
+  try {
+    if (validateUUID(req.params.id)) {
+      const job = await Jobs.findOne({ where: { id: req.params.id, status: JobStatus.APPROVED } });
+
+      return res.status(200).json({
+        message: SUCCESS_MESSAGES.RETRIEVE_JOB_Data,
+        data: job,
+      });
+    } else {
+      const externalJobPostings = await fetchMrgeData();
+      const job = externalJobPostings.find((data) => data.id === req.params.id);
+
+      return res.status(200).json({
+        message: SUCCESS_MESSAGES.RETRIEVE_JOB_Data,
+        data: job,
+      });
+    }
+    // let data: JobAttributes | MrgeJobPosting | undefined;
+    // const [jobs, externalJobPostings]: [JobAttributes | null, MrgeJobPosting[]] = await Promise.all([
+    //   Jobs.findOne({ where: { id: req.params.id, status: JobStatus.APPROVED } }),
+    //   fetchMrgeData(),
+    // ]);
+
+    // data = !jobs ? externalJobPostings.find((data) => data.id === req.params.id) : jobs;
+
+    // return res.status(200).json({
+    //   message: SUCCESS_MESSAGES.RETRIEVE_JOB_Data,
+    //   data: data,
+    // });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: error });
+  }
+}
+
 export const addJob = async (
   req: Request<{}, {}, AddJobSchema>,
-  res: Response<JobData | ErrorResponse>
+  res: Response<JobData<JobAttributes> | ErrorResponse>
 ) => {
   try {
     const job = await Jobs.create(req.body);
@@ -85,7 +125,7 @@ export const addJob = async (
 
 export const updateJobStatus = async (
   req: Request<UpdateJobStatusSchema>,
-  res: Response<JobData | ErrorResponse>
+  res: Response<JobData<JobAttributes> | ErrorResponse>
 ) => {
   try {
     const { id, status } = req.params;

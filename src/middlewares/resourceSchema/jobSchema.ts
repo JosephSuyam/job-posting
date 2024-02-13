@@ -6,12 +6,17 @@ import { DataSource } from '../../helpers/types/common.types';
 export const jobSchema = {
   getJobsSchema: z.object({
     query: z.object({
-      limit: z.number(),
-      page: z.number(),
+      limit: z.number().catch(() => Number()),
+      page: z.number().catch(() => Number()),
       search: z.string(),
       source: z.enum(getValues(DataSource)),
-    }).optional(),
+    }).partial(),
   }),
+  fetchJobSchema: z.object({
+    params: z.object({
+      id: z.string(),
+    }),
+  }).required(),
   addJobSchema: z.object({
     body: z.object({
       title: z.string(),
@@ -24,7 +29,7 @@ export const jobSchema = {
   }).required(),
   updateJobStatusSchema: z.object({
     params: z.object({
-      id: z.string(),
+      id: z.string().uuid(),
       status: z.union([
         z.literal(JobStatus.APPROVED),
         z.literal(JobStatus.SPAM),
@@ -33,6 +38,7 @@ export const jobSchema = {
   }).required(),
 }
 
-export type GetJobSchema = TypeOf<typeof jobSchema.getJobsSchema>['query'];
+export type GetJobsSchema = TypeOf<typeof jobSchema.getJobsSchema>['query'];
+export type FetchJobSchema = TypeOf<typeof jobSchema.fetchJobSchema>['params'];
 export type AddJobSchema = TypeOf<typeof jobSchema.addJobSchema>['body'];
 export type UpdateJobStatusSchema = TypeOf<typeof jobSchema.updateJobStatusSchema>['params'];

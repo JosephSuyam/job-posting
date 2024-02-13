@@ -1,13 +1,12 @@
 import { Router } from 'express';
-import { addJobValidator, updateJobStatusValidator } from '../middlewares/jobValidator';
-import { getJobs, addJob, updateJobStatus } from '../controllers/jobs';
+import { addJobValidator, fetchJobsValidator, getJobsValidator, updateJobStatusValidator } from '../middlewares/jobValidator';
+import { getJobs, fetchJob, addJob, updateJobStatus } from '../controllers/jobs';
 
 const jobsRouter = Router();
 
-jobsRouter.get('/', getJobs);
+jobsRouter.get('/', getJobsValidator(), getJobs);
+jobsRouter.get('/:id', fetchJobsValidator(), fetchJob);
 jobsRouter.get('/:status/:id', updateJobStatusValidator(), updateJobStatus);
-jobsRouter.get('/:id', getJobs);
 jobsRouter.post('/', addJobValidator(), addJob);
-jobsRouter.put('/:id', addJobValidator(), addJob);
 
 export default jobsRouter;

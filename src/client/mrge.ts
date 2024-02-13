@@ -50,7 +50,7 @@ type MrgeJobPostingTemplate = [
   }
 ]
 
-export const fetchMrge = async (): Promise<MrgeJobPosting[]> => {
+export const fetchMrgeData = async (): Promise<MrgeJobPosting[]> => {
   try {
     const { data }: AxiosResponse = await client.get(`/`);
 

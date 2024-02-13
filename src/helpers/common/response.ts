@@ -1,5 +1,6 @@
 export const SUCCESS_MESSAGES = {
   RETRIEVE_JOB_LIST: 'Job List.',
+  RETRIEVE_JOB_Data: 'Job Data.',
   CREATE_JOB_SUCCESS: 'Job Posting Created.',
   UPDATE_JOB_SUCCESS: 'Job Posting Status Updated.',
 };
