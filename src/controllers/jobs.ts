@@ -27,7 +27,7 @@ export const getJobs = async (
 
     const [jobs, externalJobPostings]: [JobList, MrgeJobPosting[]] = await Promise.all([
       Jobs.findAndCountAll({
-        // ...paging,
+        ...paging,
         where: where_statement,
       }),
       fetchMrge(),
