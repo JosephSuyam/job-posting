@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import httpStatus from 'http-status';
 import { Request, Response, NextFunction } from 'express';
 import { jobSchema } from './resourceSchema/jobSchema';
 import { formatZodError } from '../helpers/zod.helper';
@@ -15,7 +15,7 @@ export const getJobsValidator = () => (req: Request, res: Response, next: NextFu
     getJobsSchema.parse(req);
     next();
   } catch(e: any) {
-    return res.status(400).json({ message: formatZodError(e) })
+    return res.status(httpStatus.BAD_REQUEST).json({ message: formatZodError(e) })
   }
 };
 
@@ -24,7 +24,7 @@ export const fetchJobsValidator = () => (req: Request, res: Response, next: Next
     fetchJobSchema.parse(req);
     next();
   } catch(e: any) {
-    return res.status(400).json({ message: formatZodError(e) })
+    return res.status(httpStatus.BAD_REQUEST).json({ message: formatZodError(e) })
   }
 };
 
@@ -33,7 +33,7 @@ export const addJobValidator = () => (req: Request, res: Response, next: NextFun
     addJobSchema.parse(req);
     next();
   } catch(e: any) {
-    return res.status(400).json({ message: formatZodError(e) })
+    return res.status(httpStatus.BAD_REQUEST).json({ message: formatZodError(e) })
   }
 };
 
@@ -42,6 +42,6 @@ export const updateJobStatusValidator = () => (req: Request, res: Response, next
     updateJobStatusSchema.parse(req);
     next();
   } catch(e: any) {
-    return res.status(400).json({ message: formatZodError(e) })
+    return res.status(httpStatus.BAD_REQUEST).json({ message: formatZodError(e) })
   }
 };

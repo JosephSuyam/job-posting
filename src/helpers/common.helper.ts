@@ -34,5 +34,5 @@ export const paginate = (
 export const validateUUID = (uuid: string) => {
   const pattern = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
 
-  return uuid.match(pattern);
+  return pattern.test(uuid);
 };

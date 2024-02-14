@@ -14,6 +14,7 @@ import { JobData, JobList } from '../helpers/types/jobs.types';
 import { DataSource, ErrorResponse, PaginatedDataResponse } from '../helpers/types/common.types';
 import { MrgeJobPosting, fetchMrgeData } from '../client/mrge';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../helpers/common/response';
+import httpStatus from 'http-status';
 
 export const getJobs = async (
   req: Request<{}, {}, {}, GetJobsSchema>,
@@ -28,21 +29,21 @@ export const getJobs = async (
 
     const [jobs, externalJobPostings]: [JobList, MrgeJobPosting[]] = await Promise.all([
       Jobs.findAndCountAll({
-        // ...paging,
         where: where_statement,
+        // ...paging,
       }),
       fetchMrgeData(),
     ]);
     const message = SUCCESS_MESSAGES.RETRIEVE_JOB_LIST;
 
     if (req.query?.source === DataSource.MRGE) {
-      return res.status(200).json({
+      return res.status(httpStatus.OK).json({
         message,
         pagination: pagination(externalJobPostings.length, paging),
         data: paginate(externalJobPostings, paging.page, paging.limit),
       });
     } else if (req.query?.source === DataSource.INTERNAL) {
-      return res.status(200).json({
+      return res.status(httpStatus.OK).json({
         message,
         pagination: pagination(jobs.count, paging),
         data: jobs.rows,
@@ -50,14 +51,14 @@ export const getJobs = async (
     }
     const job_list = [ ...jobs.rows, ...externalJobPostings ];
 
-    return res.status(200).json({
+    return res.status(httpStatus.OK).json({
       message,
       pagination: pagination(jobs.count + externalJobPostings.length, paging),
       data: paginate(job_list, paging.page, paging.limit),
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: error });
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: error });
   }
 }
 
@@ -69,7 +70,7 @@ export const fetchJob = async (
     if (validateUUID(req.params.id)) {
       const job = await Jobs.findOne({ where: { id: req.params.id, status: JobStatus.APPROVED } });
 
-      return res.status(200).json({
+      return res.status(httpStatus.OK).json({
         message: SUCCESS_MESSAGES.RETRIEVE_JOB_Data,
         data: job,
       });
@@ -77,26 +78,14 @@ export const fetchJob = async (
       const externalJobPostings = await fetchMrgeData();
       const job = externalJobPostings.find((data) => data.id === req.params.id);
 
-      return res.status(200).json({
+      return res.status(httpStatus.OK).json({
         message: SUCCESS_MESSAGES.RETRIEVE_JOB_Data,
         data: job,
       });
     }
-    // let data: JobAttributes | MrgeJobPosting | undefined;
-    // const [jobs, externalJobPostings]: [JobAttributes | null, MrgeJobPosting[]] = await Promise.all([
-    //   Jobs.findOne({ where: { id: req.params.id, status: JobStatus.APPROVED } }),
-    //   fetchMrgeData(),
-    // ]);
-
-    // data = !jobs ? externalJobPostings.find((data) => data.id === req.params.id) : jobs;
-
-    // return res.status(200).json({
-    //   message: SUCCESS_MESSAGES.RETRIEVE_JOB_Data,
-    //   data: data,
-    // });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: error });
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: error });
   }
 }
 
@@ -116,10 +105,12 @@ export const addJob = async (
       employment_type: job.employment_type,
     });
 
-    return res.status(201).json({ message: SUCCESS_MESSAGES.CREATE_JOB_SUCCESS, data: job });
+    return res.status(httpStatus.CREATED).json({
+      message: SUCCESS_MESSAGES.CREATE_JOB_SUCCESS, data: job
+    });
   } catch (error) {
     console.error('Error: ', error);
-    return res.status(500).json({ message: error });
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: error });
   }
 }
 
@@ -131,15 +122,19 @@ export const updateJobStatus = async (
     const { id, status } = req.params;
     const job = await Jobs.findOne({ where: { id, status: JobStatus.PENDING } });
 
-    if (!job) return res.status(409).json({ message: ERROR_MESSAGES.UPDATE_JOB_ERROR });
+    if (!job) return res.status(httpStatus.CONFLICT).json({
+      message: ERROR_MESSAGES.UPDATE_JOB_ERROR
+    });
     else {
       job.status = status;
       await job.save();
     }
 
-    return res.status(201).json({ message: SUCCESS_MESSAGES.UPDATE_JOB_SUCCESS, data: job });
+    return res.status(httpStatus.OK).json({
+      message: SUCCESS_MESSAGES.UPDATE_JOB_SUCCESS, data: job
+    });
   } catch (error) {
     console.error('Error: ', error);
-    return res.status(500).json({ message: error });
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: error });
   }
 }
