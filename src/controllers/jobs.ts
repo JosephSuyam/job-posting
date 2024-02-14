@@ -67,22 +67,33 @@ export const fetchJob = async (
   res: Response<JobData<JobAttributes | null | MrgeJobPosting> | ErrorResponse>
 ) => {
   try {
+    let data: JobAttributes | MrgeJobPosting;
+
     if (validateUUID(req.params.id)) {
       const job = await Jobs.findOne({ where: { id: req.params.id, status: JobStatus.APPROVED } });
 
-      return res.status(httpStatus.OK).json({
-        message: SUCCESS_MESSAGES.RETRIEVE_JOB_Data,
-        data: job,
-      });
+      if (!job)
+        return res.status(httpStatus.NOT_FOUND).json({
+          message: ERROR_MESSAGES.JOB_NOT_FOUND_ERROR
+        });
+
+      data = job;
     } else {
       const externalJobPostings = await fetchMrgeData();
       const job = externalJobPostings.find((data) => data.id === req.params.id);
 
-      return res.status(httpStatus.OK).json({
-        message: SUCCESS_MESSAGES.RETRIEVE_JOB_Data,
-        data: job,
-      });
+      if (!job)
+        return res.status(httpStatus.NOT_FOUND).json({
+          message: ERROR_MESSAGES.JOB_NOT_FOUND_ERROR
+        });
+
+      data = job;
     }
+
+    return res.status(httpStatus.OK).json({
+      message: SUCCESS_MESSAGES.RETRIEVE_JOB_Data,
+      data,
+    });
   } catch (error) {
     console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: error });
