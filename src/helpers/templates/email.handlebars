@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Posting Approval</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f7f7f7;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      p {
+        color: #555;
+        margin-bottom: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+      }
+      table td {
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: left;
+      }
+      .button-container {
+        text-align: center;
+      }
+      .button {
+        display: inline-block;
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 0 10px;
+        transition: background-color 0.3s;
+        cursor: pointer;
+      }
+      .button:hover {
+        background-color: #45a049;
+      }
+      .footer {
+        text-align: center;
+        color: #777;
+        font-size: 14px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Job Posting Request</h2>
+      <p>We would like to seek your approval for the following job posting:</p>
+      <table>
+        <tr>
+          <td>Job Title:</td>
+          <td>{{ title }}</td>
+        </tr>
+        <tr>
+          <td>Company:</td>
+          <td>{{ company }}</td>
+        </tr>
+        <tr>
+          <td>Location:</td>
+          <td>{{ location }}</td>
+        </tr>
+        <tr>
+          <td>Description:</td>
+          <td>{{ description }}</td>
+        </tr>
+        <tr>
+          <td>Employment Type:</td>
+          <td>{{ employment_type }}</td>
+        </tr>
+      </table>
+      <p>Please review the job posting and click one of the buttons below to approve or reject:</p>
+      <div class="button-container">
+          <a href="{{ approval_link }}" class="button">Approve</a>
+          <a href="{{ spam_link }}" class="button" style="background-color: #f44336;">Reject</a>
+      </div>
+      <p class="footer">Thank you.</p>
+    </div>
+  </body>
+</html>
