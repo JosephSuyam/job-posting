@@ -85,9 +85,6 @@ describe('Jobs CRUD Endpoints', () => {
         .then((res) => {
           expect(res.statusCode).toBe(200);
           const { data } = res.body;
-          console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-          console.log(res.body);
-          console.log(data);
           expect(data.title).toBe(job_posting.title);
           expect(data.description).toBe(job_posting.description);
         })
